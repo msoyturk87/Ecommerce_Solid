@@ -16,6 +16,6 @@ public interface UserService {
 
      List<UserDTO> readAll();
      void deactivateAccount(Long id);
-    UserDTO readByEmail(String email);
+    User readByEmail(String email);
 
 }

@@ -1,11 +1,21 @@
 package com.cybertek.implementation;
 
+import com.cybertek.dto.CurrencyDTO;
+import com.cybertek.dto.CustomOrderItemDTO;
+import com.cybertek.dto.OrderDTO;
+import com.cybertek.dto.OrderItemDTO;
+import com.cybertek.entity.Currency;
+import com.cybertek.entity.Order;
+import com.cybertek.entity.OrderItem;
+import com.cybertek.entity.User;
 import com.cybertek.enums.OrderStatus;
-import com.cybertek.model.Order;
-import com.cybertek.model.OrderItem;
-import com.cybertek.model.User;
-import com.cybertek.model.dto.CustomOrderItemDTO;
+import com.cybertek.exception.EcommerceException;
+import com.cybertek.mapper.MapperUtil;
+
 import com.cybertek.repository.OrderItemRepository;
+import com.cybertek.service.OrderItemService;
+import com.cybertek.service.OrderService;
+import com.cybertek.service.UserService;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -13,52 +23,53 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 @Service
-public class OrderItemServiceImpl {
+public class OrderItemServiceImpl implements OrderItemService {
 
     private final OrderItemRepository orderItemRepository;
-    private final OrderServiceImpl orderService;
-    private final UserServiceImpl userService;
+    private final OrderService orderService;
+    private final UserService userService;
+    private final MapperUtil mapperUtil;
 
-    public OrderItemServiceImpl(OrderItemRepository orderItemRepository, OrderServiceImpl orderService,
-                                UserServiceImpl userService) {
-
+    public OrderItemServiceImpl(OrderItemRepository orderItemRepository, OrderService orderService, UserService userService, MapperUtil mapperUtil) {
         this.orderItemRepository = orderItemRepository;
         this.orderService = orderService;
         this.userService = userService;
+        this.mapperUtil = mapperUtil;
     }
 
+    @Override
+    public OrderItem create(OrderItemDTO orderItemDTO) {
 
-    public OrderItem create(OrderItem orderItem) throws Exception {
+        // TODO get the current user froum securityContextholder
+        // instead of "orderItem.getOrder().getUser()" add current user
 
-        //TODO get the current user froum securityContextholder
-        // instedad of "orderItem.getOrder().getUser()" add current user
-        List<Order> orders = orderService.readByUserAndStatus(orderItem.getOrder().getUser(), OrderStatus.IN_PROGRESS);
+        OrderItem convertedOrderItem = mapperUtil.convert(orderItemDTO, new OrderItem());
+        List<Order> orders = orderService.readByUserAndStatus(convertedOrderItem.getOrder().getUser(), OrderStatus.IN_PROGRESS);
 
-        if(orders.size()>0){
-            Order currentOrder=orders.get(0);
-            orderItem.setOrder(currentOrder); // cascade will know that
+        if (orders.size() > 0) {
+            Order currentOrder = orders.get(0);
+            convertedOrderItem.setOrder(currentOrder); // cascade will know that
         }
 
         //TODO get the current user froum securityContextholder
         // instedad of "orderItem.getOrder().getUser()" add current user
-        Optional<OrderItem> foundedItem=orderItemRepository.findAllByProductIdAndOrderUserIdAndOrderStatus(orderItem.getProduct().getId(),
-                orderItem.getOrder().getUser().getId(),
+        Optional<OrderItem> foundedItem = orderItemRepository.findAllByProductIdAndOrderUserIdAndOrderStatus(convertedOrderItem.getProduct().getId(),
+                convertedOrderItem.getOrder().getUser().getId(),
                 OrderStatus.IN_PROGRESS);
 
-        if(foundedItem.isPresent()){
+        if (foundedItem.isPresent()) {
 
-            foundedItem.get().setPrice(orderItem.getPrice());
-            foundedItem.get().setQuantity(orderItem.getQuantity());
+            foundedItem.get().setPrice(convertedOrderItem.getPrice());
+            foundedItem.get().setQuantity(convertedOrderItem.getQuantity());
             return orderItemRepository.save(foundedItem.get());
         }
-
-
-
-        return orderItemRepository.save(orderItem);
+        return orderItemRepository.save(convertedOrderItem);
     }
 
-    public List<OrderItem> buildOrderItems(CustomOrderItemDTO orderItemsDTO) throws Exception {
+    @Override
+    public List<OrderItemDTO> buildOrderItems(CustomOrderItemDTO orderItemsDTO) {
 
         User currentUser = userService.readByEmail("admin@admin.com");
         List<Order> orders = orderService.readByUserAndStatus(currentUser, OrderStatus.IN_PROGRESS);
@@ -77,22 +88,21 @@ public class OrderItemServiceImpl {
 
                 }).collect(Collectors.toList());
 
-        return orderItemRepository.saveAll(orderItems);
-    }
-
-    public OrderItem readById(Long id) throws Exception {
-
-        return orderItemRepository.findById(id).orElseThrow(()->new Exception("No orderItem "));
-    }
-
-    public List<OrderItem> readAll(){
-
-        return orderItemRepository.findAll(Sort.by("orderStatus"));
+        return orderItems.stream().map(obj -> mapperUtil.convert(obj, new OrderItemDTO())).collect(Collectors.toList());
     }
 
 
+    @Override
+    public OrderItemDTO readById(Long id) throws EcommerceException {
+        OrderItem foundedOrderItem = orderItemRepository.findById(id)
+                .orElseThrow(() -> new EcommerceException("This orderItem does not exist"));
+        return mapperUtil.convert(foundedOrderItem,new OrderItemDTO());    }
 
-
-
-
+    @Override
+    public List<OrderItemDTO> readAll() {
+        List<OrderItem> list = orderItemRepository.findAll(Sort.by("orderStatus"));
+        return list.stream().map(obj -> mapperUtil.convert(obj, new OrderItemDTO())).collect(Collectors.toList());
+    }
 }
+
+
