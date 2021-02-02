@@ -1,76 +1,85 @@
 package com.cybertek.implementation;
 
-import com.cybertek.model.Currency;
-import com.cybertek.model.Product;
+import com.cybertek.dto.CurrencyDTO;
+import com.cybertek.entity.Currency;
+import com.cybertek.entity.Product;
+import com.cybertek.exception.EcommerceException;
+import com.cybertek.mapper.MapperUtil;
 import com.cybertek.repository.CurrencyRepository;
-import org.springframework.data.domain.Sort;
+import com.cybertek.service.CurrencyService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
-public class CurrencyServiceImpl {
-
+public class CurrencyServiceImpl implements CurrencyService {
+    private final MapperUtil mapperUtil;
     private final CurrencyRepository currencyRepository;
     private final ProductServiceImpl productService;
 
-    public CurrencyServiceImpl(CurrencyRepository currencyRepository, ProductServiceImpl productService) {
+    public CurrencyServiceImpl(MapperUtil mapperUtil, CurrencyRepository currencyRepository, ProductServiceImpl productService) {
+        this.mapperUtil = mapperUtil;
         this.currencyRepository = currencyRepository;
         this.productService = productService;
     }
 
-
-    public Currency create(Currency currency) throws Exception {
-
-        Optional<Currency> foundedCurrency = currencyRepository.findByNameAndSymbol(currency.getName(),currency.getSymbol());
+    @Override
+    public Currency create(CurrencyDTO currencyDTO) throws EcommerceException {
+        Currency convertedCurrency = mapperUtil.convert(currencyDTO, new Currency());
+        Optional<Currency> foundedCurrency =
+                    currencyRepository.findByNameAndSymbol(convertedCurrency.getName(),convertedCurrency.getSymbol());
 
         if(foundedCurrency.isPresent()) {
-            throw new Exception(currency.getName()+" already exist.You can not create! ");
+            throw new EcommerceException(convertedCurrency.getName()+ " already exist.You can not create! ");
         }
-        return currencyRepository.save(currency);
+        return currencyRepository.save(convertedCurrency);
     }
-
-    public void update(Currency currency) throws Exception {
-
-        Optional<Currency> foundedCurrency = currencyRepository.findByNameAndSymbol(currency.getName(), currency.getSymbol());
+    @Override
+    public void update(CurrencyDTO currencyDTO) throws EcommerceException {
+        Currency convertedCurrency = mapperUtil.convert(currencyDTO, new Currency());
+        Optional<Currency> foundedCurrency = currencyRepository.findByNameAndSymbol(convertedCurrency.getName(), convertedCurrency.getSymbol());
         if(foundedCurrency.isEmpty())
-            throw new Exception(currency.getName()+"  does not exist ");
+            throw new EcommerceException(convertedCurrency.getName()+"  does not exist ");
 
-        currency.setId(foundedCurrency.get().getId());
-        currencyRepository.save(currency);
-
+        convertedCurrency.setId(foundedCurrency.get().getId());
+        currencyRepository.save(convertedCurrency);
     }
 
-    public List<Currency> readAll(){
-        return currencyRepository.findAll(Sort.by("name"));
+    @Override
+    public List<CurrencyDTO> readAll() {
+        List<Currency> list = currencyRepository.findAll();
+        return list.stream().map(obj -> mapperUtil.convert(obj,new CurrencyDTO())).collect(Collectors.toList());    }
 
-    }
+    @Override
+    public CurrencyDTO readById(Integer id) throws EcommerceException {
+        Currency foundedCurrency = currencyRepository.findById(id)
+                .orElseThrow(()->new EcommerceException("This currency does not exist"));
+        return mapperUtil.convert(foundedCurrency,new CurrencyDTO());    }
 
-    public Currency readById(Integer id) throws Exception {
+    @Override
+    public CurrencyDTO readByName(String name) throws EcommerceException {
+        Currency foundedCurrency = currencyRepository.findByName(name)
+                .orElseThrow(() -> new EcommerceException("Currency doesn't exist"));
+        return mapperUtil.convert(foundedCurrency,new CurrencyDTO());    }
 
-        return currencyRepository.findById(id).orElseThrow(()->new Exception("Currency doesn't exist"));
-    }
+    @Override
+    public void deleteById(Integer id) throws EcommerceException {
 
-    public Currency readByName(String name) throws Exception {
-
-        return currencyRepository.findByName(name).orElseThrow(()->new Exception("Currency doesn't exist"));
-    }
-
-    public void deleteById(Integer id) throws Exception {
-
-
-        Currency foundedCurrency = readById(id);
+        Currency foundedCurrency = currencyRepository.findById(id)
+                .orElseThrow(()->new EcommerceException("this currency does not exist"));
 
         List<Product> products = productService.readAllByCurrency(foundedCurrency);
         if(products.size()>0){
-            throw new Exception("This Currency can not be deleted");
+            throw new EcommerceException("This Currency can not be deleted");
         }
 
         foundedCurrency.setName(foundedCurrency.getName()+"-"+foundedCurrency.getId());
         foundedCurrency.setSymbol(foundedCurrency.getSymbol()+"-"+foundedCurrency.getId());
         foundedCurrency.setIsDeleted(true);
         currencyRepository.save(foundedCurrency);
+
     }
 
 
