@@ -27,7 +27,9 @@ public class CurrencyServiceImpl implements CurrencyService {
 
     @Override
     public Currency create(CurrencyDTO currencyDTO) throws EcommerceException {
+
         Currency convertedCurrency = mapperUtil.convert(currencyDTO, new Currency());
+
         Optional<Currency> foundedCurrency =
                     currencyRepository.findByNameAndSymbol(convertedCurrency.getName(),convertedCurrency.getSymbol());
 
@@ -36,17 +38,20 @@ public class CurrencyServiceImpl implements CurrencyService {
         }
         return currencyRepository.save(convertedCurrency);
     }
+
     @Override
     public void update(CurrencyDTO currencyDTO) throws EcommerceException {
+
         Currency convertedCurrency = mapperUtil.convert(currencyDTO, new Currency());
+
         Optional<Currency> foundedCurrency = currencyRepository.findByNameAndSymbol(convertedCurrency.getName(), convertedCurrency.getSymbol());
+
         if(foundedCurrency.isEmpty())
             throw new EcommerceException(convertedCurrency.getName()+"  does not exist ");
 
         convertedCurrency.setId(foundedCurrency.get().getId());
         currencyRepository.save(convertedCurrency);
     }
-
     @Override
     public List<CurrencyDTO> readAll() {
         List<Currency> list = currencyRepository.findAll();
@@ -71,10 +76,11 @@ public class CurrencyServiceImpl implements CurrencyService {
                 .orElseThrow(()->new EcommerceException("this currency does not exist"));
 
         List<Product> products = productService.readAllByCurrency(foundedCurrency);
+
         if(products.size()>0){
             throw new EcommerceException("This Currency can not be deleted");
         }
-
+        // Both of them are unique (together)
         foundedCurrency.setName(foundedCurrency.getName()+"-"+foundedCurrency.getId());
         foundedCurrency.setSymbol(foundedCurrency.getSymbol()+"-"+foundedCurrency.getId());
         foundedCurrency.setIsDeleted(true);

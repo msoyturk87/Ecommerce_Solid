@@ -18,6 +18,7 @@ import javax.persistence.UniqueConstraint;
 @Where(clause = "is_deleted=false")
 public class Currency extends BaseEntity<Integer> {
 
+
     @Column(nullable = false)
     private String name;
 
