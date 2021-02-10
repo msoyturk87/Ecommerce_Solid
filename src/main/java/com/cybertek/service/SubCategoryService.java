@@ -11,7 +11,9 @@ import java.util.List;
 public interface SubCategoryService {
 
 
+
      SubCategory create(SubCategoryDTO subCategoryDTO) throws EcommerceException;
+
      void update(SubCategoryDTO subCategoryDTO) throws EcommerceException;
      List<SubCategoryDTO> readAll();
      SubCategoryDTO readById(Integer id) throws EcommerceException;
