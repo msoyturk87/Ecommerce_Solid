@@ -13,8 +13,12 @@ public interface UomService {
 
 
      Uom create(UomDTO uomDTO) throws EcommerceException;
+
      void update(UomDTO uomDTO) throws EcommerceException;
+
      List<UomDTO> readAll();
+
      UomDTO readById(Integer id) throws EcommerceException;
+
      void deleteById(Integer id) throws EcommerceException;
 }
