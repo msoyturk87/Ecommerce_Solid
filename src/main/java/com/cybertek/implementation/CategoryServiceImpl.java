@@ -34,8 +34,10 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public Category create(CategoryDTO categoryDTO) throws EcommerceException {
+        // name is unique
         Category convertedCategory = mapperUtil.convert(categoryDTO, new Category());
-        Optional <Category> foundedCategory = categoryRepository.findByName(convertedCategory.getName());
+
+        Optional<Category> foundedCategory = categoryRepository.findByName(convertedCategory.getName());
 
         if(foundedCategory.isPresent())
             throw new EcommerceException("Category Already exist");
@@ -59,6 +61,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDTO> readAll() {
+
         List<Category> list = categoryRepository.findAll(Sort.by("name"));
         return list.stream().map(obj -> mapperUtil.convert(obj,new CategoryDTO())).collect(Collectors.toList());
 
@@ -77,6 +80,7 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteById(Integer id) throws EcommerceException {
 
         Category foundedCategory = categoryRepository.findById(id).orElseThrow(() -> new EcommerceException("category doesn't exist"));
+
         List<SubCategory> subCategories = subCategoryService.readAllByCategory(foundedCategory);
 
         if( subCategories.size()>0 ) {

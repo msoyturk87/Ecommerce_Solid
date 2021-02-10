@@ -20,4 +20,5 @@ public interface CategoryService {
     CategoryDTO readById(Integer id) throws EcommerceException;
 
     void deleteById(Integer id) throws EcommerceException;
+
 }

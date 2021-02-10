@@ -16,7 +16,7 @@ import javax.persistence.Table;
 @Setter
 public class UomDTO{
 
-    private  Integer id;
+    private Integer id;
     private String name;
     private String description;
 }
