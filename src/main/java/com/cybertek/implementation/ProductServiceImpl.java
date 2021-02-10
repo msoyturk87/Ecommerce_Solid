@@ -40,13 +40,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Transactional  // TODO Add all update - create -delete method for Transactional
+    @Transactional
     public void update(ProductDTO productDTO) throws Exception {
 
         if (productDTO.getName() == null || productDTO.getPrice().compareTo(BigDecimal.ZERO) < 0 || productDTO.getQuantity() <= 0) {
             throw new Exception("Something went wrong please try again");
         }
-        // name should be unique
+        // name should be unique ??
         Optional<Product> foundedProduct = productRepository.findByName(productDTO.getName());
 
         if (foundedProduct.isEmpty()) {
@@ -75,23 +75,20 @@ public class ProductServiceImpl implements ProductService {
         Product foundedProduct = productRepository.findById(id).orElseThrow(() -> new EcommerceException("This product not found"));
 
         return mapperUtil.convert(foundedProduct,new ProductDTO());
-
-
     }
 
     @Override
     public List<Product> readAllBySubCategory(SubCategory subCategory) {
-        return productRepository.findAllBySubCategoryId(subCategory.getId());// alternate or it is good
+        return productRepository.findAllBySubCategoryId(subCategory.getId());
 
     }
     @Override
     public List<Product> readAllByUom(Uom uom) {
-        return productRepository.findByUom(uom);// alternate or it is good
-    }
+        return productRepository.findByUom(uom);}
 
     @Override
     public List<Product> readAllByCurrency(Currency currency) {
-        return productRepository.findByCurrency(currency);// alternate or it is good
+        return productRepository.findByCurrency(currency);
           }
 
 }

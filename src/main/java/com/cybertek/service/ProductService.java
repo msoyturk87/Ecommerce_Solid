@@ -13,6 +13,7 @@ import java.util.List;
 public interface ProductService {
 
      Product create(ProductDTO productDTO) throws Exception;
+
      void update(ProductDTO productDTO) throws Exception;
      List<ProductDTO> readAllActive();
      List<ProductDTO> readAll();

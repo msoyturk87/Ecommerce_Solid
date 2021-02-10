@@ -16,7 +16,6 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
 
    Optional<Product> findByName(String name);
 
-
    @Query(value = "SELECT * FROM products p JOIN product_sub_category_rel ps  " +
            "on p.id=product_sub_category_rel.product_id " +
            "WHERE ps.sub_category_id=?1" ,nativeQuery = true)
