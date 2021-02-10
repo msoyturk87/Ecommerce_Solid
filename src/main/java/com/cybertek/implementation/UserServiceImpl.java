@@ -87,16 +87,6 @@ public class UserServiceImpl implements UserService {
     public User readByEmail(String email) throws EcommerceException {
         return userRepository.findByEmail(email).orElseThrow(() -> new EcommerceException("There is no User with this email"));
     }
-    /*
 
-
-
-
-
-
-    public User readByEmail(String email){
-        return userRepository.findByUserName(email)
-                .orElseThrow(() -> new NoSuchElementException("This user does not exist"));
-    }*/
 
 }
