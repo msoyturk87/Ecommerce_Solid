@@ -1,75 +1,97 @@
 package com.cybertek.implementation;
 
 import com.cybertek.dto.CurrencyDTO;
+import com.cybertek.dto.ProductDTO;
 import com.cybertek.entity.Currency;
 import com.cybertek.entity.Product;
 import com.cybertek.enums.Status;
-import com.cybertek.model.*;
+import com.cybertek.entity.*;
+import com.cybertek.exception.EcommerceException;
+import com.cybertek.mapper.MapperUtil;
 import com.cybertek.repository.ProductRepository;
+import com.cybertek.service.ProductService;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
-public class ProductServiceImpl {
+public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
+    private final MapperUtil mapperUtil;
 
-    public ProductServiceImpl(ProductRepository productRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, MapperUtil mapperUtil) {
         this.productRepository = productRepository;
+        this.mapperUtil = mapperUtil;
     }
 
+    @Override
     @Transactional
-    public Product create(Product product) throws Exception {
+    public Product create(ProductDTO productDTO) throws Exception {
 
-        if(product.getName()==null || product.getPrice().compareTo(BigDecimal.ZERO )<0 || product.getQuantity()<=0) {
+        if(productDTO.getName()==null || productDTO.getPrice().compareTo(BigDecimal.ZERO )<0 || productDTO.getQuantity()<=0) {
             throw new Exception("Something went wrong please try again");
         }
-        return productRepository.save(product);
+        return productRepository.save(mapperUtil.convert(productDTO,new Product()));
     }
 
+    @Override
     @Transactional  // TODO Add all update - create -delete method for Transactional
-    public void update(Product product) throws Exception {
+    public void update(ProductDTO productDTO) throws Exception {
 
-        productRepository.findById(product.getId())
-                .orElseThrow(()->new Exception("This product does not exists"));
-
-        if(product.getName()==null || product.getPrice().compareTo(BigDecimal.ZERO )<0 || product.getQuantity()<=0) {
+        if (productDTO.getName() == null || productDTO.getPrice().compareTo(BigDecimal.ZERO) < 0 || productDTO.getQuantity() <= 0) {
             throw new Exception("Something went wrong please try again");
         }
+        // name should be unique
+        Optional<Product> foundedProduct = productRepository.findByName(productDTO.getName());
 
+        if (foundedProduct.isEmpty()) {
+            throw new EcommerceException("There is no product to update");
+        }
+        Product convertedProduct = mapperUtil.convert(productDTO, new Product());
+        convertedProduct.setId(foundedProduct.get().getId());
 
-        productRepository.save(product);
+        productRepository.save(convertedProduct);
+
     }
 
-    public List<Product> readAllActive(){
-
-        return productRepository.findAllByStatus(Status.ACTIVE); // alternate or it is good
+    @Override
+    public List<ProductDTO> readAllActive() {
+        List<Product> list = productRepository.findAllByStatus(Status.ACTIVE);// alternate or it is good
+        return list.stream().map(obj -> {return mapperUtil.convert(obj,new ProductDTO());}).collect(Collectors.toList());
     }
 
-    public List<Product> readAll(){
+    @Override
+    public List<ProductDTO> readAll() {
+        List<Product> list = productRepository.findAll();// alternate or it is good
+        return list.stream().map(obj -> {return mapperUtil.convert(obj,new ProductDTO());}).collect(Collectors.toList());    }
 
-        return productRepository.findAll(Sort.by("name"));
-    }
-    public Product readById(Long id){
+    @Override
+    public ProductDTO readById(Long id) throws EcommerceException {
+        Product foundedProduct = productRepository.findById(id).orElseThrow(() -> new EcommerceException("This product not found"));
 
-        return productRepository.findById(id).orElse(null);
-    }
-
-    public List<Product> readAllBySubCategory(SubCategory subCategory){
-
-        return productRepository.findAllBySubCategoryId(subCategory.getId());
-    }
+        return mapperUtil.convert(foundedProduct,new ProductDTO());
 
 
-    public List<Product> readAllByUom(Uom foundedUom) {
-        return productRepository.findByUom(foundedUom);
     }
 
-    public List<Product> readAllByCurrency(Currency foundedCurrency) {
+    @Override
+    public List<Product> readAllBySubCategory(SubCategory subCategory) {
+        return productRepository.findAllBySubCategoryId(subCategory.getId());// alternate or it is good
 
-        return productRepository.findByCurrency(foundedCurrency);
     }
+    @Override
+    public List<Product> readAllByUom(Uom uom) {
+        return productRepository.findByUom(uom);// alternate or it is good
+    }
+
+    @Override
+    public List<Product> readAllByCurrency(Currency currency) {
+        return productRepository.findByCurrency(currency);// alternate or it is good
+          }
+
 }

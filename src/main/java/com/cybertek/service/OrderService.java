@@ -6,6 +6,7 @@ import com.cybertek.entity.Order;
 import com.cybertek.entity.User;
 import com.cybertek.enums.OrderStatus;
 
+import com.cybertek.exception.EcommerceException;
 import com.cybertek.repository.OrderRepository;
 import org.springframework.data.domain.Sort;
 
@@ -17,9 +18,9 @@ public interface OrderService {
 
      Order create(OrderDTO orderDTO);
      void update(Order order);
-     Order readById(OrderDTO orderDTO);
+     OrderDTO readById(Long id) throws EcommerceException;
      List<OrderDTO> readAll();
-     List<Order> readByUserAndStatus(User user, OrderStatus status);
+     List<OrderDTO> readByUserAndStatus(User user, OrderStatus status);
 
 
 }

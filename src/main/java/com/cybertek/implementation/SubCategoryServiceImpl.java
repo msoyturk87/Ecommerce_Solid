@@ -1,57 +1,75 @@
 package com.cybertek.implementation;
 
-import com.cybertek.model.Category;
-import com.cybertek.model.Product;
-import com.cybertek.model.SubCategory;
+import com.cybertek.dto.ProductDTO;
+import com.cybertek.dto.SubCategoryDTO;
+import com.cybertek.entity.Category;
+import com.cybertek.entity.Product;
+import com.cybertek.entity.SubCategory;
+import com.cybertek.exception.EcommerceException;
+import com.cybertek.mapper.MapperUtil;
 import com.cybertek.repository.SubCategoryRepository;
+import com.cybertek.service.ProductService;
+import com.cybertek.service.SubCategoryService;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
-public class SubCategoryServiceImpl {
-    private final SubCategoryRepository subCategoryRepository;
-    private final ProductServiceImpl productService;
+public class SubCategoryServiceImpl implements SubCategoryService {
 
-    public SubCategoryServiceImpl(SubCategoryRepository subCategoryRepository, ProductServiceImpl productService) {
+    private final SubCategoryRepository subCategoryRepository;
+    private final MapperUtil mapperUtil;
+    private final ProductService productService;
+
+    public SubCategoryServiceImpl(SubCategoryRepository subCategoryRepository, MapperUtil mapperUtil, ProductService productService) {
+
         this.subCategoryRepository = subCategoryRepository;
+        this.mapperUtil = mapperUtil;
         this.productService = productService;
     }
 
-    public SubCategory create(SubCategory subCategory) throws Exception {
+    @Override
+    @Transactional
+    public SubCategory create(SubCategoryDTO subCategoryDTO) throws EcommerceException {
 
         Optional<SubCategory> foundSubCategory =
-                subCategoryRepository.findByNameAndCategoryId(subCategory.getName(), subCategory.getCategory().getId());
+                subCategoryRepository.findByNameAndCategoryId(subCategoryDTO.getName(), subCategoryDTO.getCategory().getId());
 
         if(foundSubCategory.isPresent()){
-            throw new Exception("Sub Category already exists ");
+            throw new EcommerceException("Sub Category already exists ");
         }
-        return subCategoryRepository.save(subCategory);
+        return subCategoryRepository.save(mapperUtil.convert(subCategoryDTO,new SubCategory()));    }
+
+    @Override
+    @Transactional
+    public void update(SubCategoryDTO subCategoryDTO) throws EcommerceException {
+
+        SubCategory foundedSubCategory = subCategoryRepository.findByNameAndCategoryId(subCategoryDTO.getName(), subCategoryDTO.getCategory().getId())
+                .orElseThrow(() -> new EcommerceException("This category does not exist"));
+        SubCategory convertSubCategory = mapperUtil.convert(subCategoryDTO, new SubCategory());
+        convertSubCategory.setId(foundedSubCategory.getId());
+        subCategoryRepository.save(convertSubCategory);
     }
 
-    public void update(SubCategory subCategory) throws Exception {
-
-
-        SubCategory foundedSubCategory = subCategoryRepository.findByNameAndCategoryId(subCategory.getName(), subCategory.getCategory().getId())
-                .orElseThrow(() -> new Exception("This category does not exist"));
-
-        subCategory.setId(foundedSubCategory.getId());
-        subCategoryRepository.save(subCategory);
+    @Override
+    public List<SubCategoryDTO> readAll() {
+        List<SubCategory> list = subCategoryRepository.findAll();
+        return list.stream().map(obj -> {return mapperUtil.convert(obj,new SubCategoryDTO());}).collect(Collectors.toList());
     }
 
-     public List<SubCategory> readAll(){
+    @Override
+    public SubCategoryDTO readById(Integer id) throws EcommerceException {
+        SubCategory foundedSubCategory = subCategoryRepository.findById(id).orElseThrow(() -> new EcommerceException("This subCategory not found"));
 
-       return subCategoryRepository.findAll();
-     }
+        return mapperUtil.convert(foundedSubCategory,new SubCategoryDTO());    }
 
-    public SubCategory readById(Integer id){
-
-        return subCategoryRepository.findById(id).orElse(null);
-    }
-
-    public void delete(Integer id) throws Exception {
-        SubCategory foundedSubCategory = subCategoryRepository.findById(id).orElseThrow(() -> new Exception("This subCategory does not exist "));
+    @Override
+    @Transactional
+    public void delete(Integer id) throws EcommerceException {
+        SubCategory foundedSubCategory = subCategoryRepository.findById(id).orElseThrow(() -> new EcommerceException("This subCategory does not exist "));
 
 
         List<Product> products = productService.readAllBySubCategory(foundedSubCategory);
@@ -59,7 +77,7 @@ public class SubCategoryServiceImpl {
         // TODO verify this link
 
         if( products.size()>0 ) {
-            throw new Exception("This subCategory can not be deleted");
+            throw new EcommerceException("This subCategory can not be deleted");
         }
 
         foundedSubCategory.setName(foundedSubCategory.getName()+"-"+foundedSubCategory.getId());
@@ -67,10 +85,30 @@ public class SubCategoryServiceImpl {
         subCategoryRepository.save(foundedSubCategory);
     }
 
+    @Override
+    public List<SubCategory> readAllByCategory(Category category) {
+        return subCategoryRepository.findAllByCategory(category);
+    }
+
+
+
+
+
+
+
+
+
+
+    /*
+
+    public void delete(Integer id) throws Exception {
+
+    }
+
     public List<SubCategory> readAllByCategory(Category category){
 
         return subCategoryRepository.findAllByCategory(category);
     }
-
+*/
 
 }
