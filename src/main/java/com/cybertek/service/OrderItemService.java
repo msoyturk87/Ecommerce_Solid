@@ -12,7 +12,7 @@ public interface OrderItemService {
 
 
     public OrderItem create(OrderItemDTO orderItemDTO);
-    public List<OrderItemDTO> buildOrderItems(CustomOrderItemDTO orderItemsDTO) ;
+    public List<OrderItemDTO> buildOrderItems(CustomOrderItemDTO orderItemsDTO) throws EcommerceException;
     public OrderItemDTO readById(Long id) throws EcommerceException;
     public List<OrderItemDTO> readAll();
 

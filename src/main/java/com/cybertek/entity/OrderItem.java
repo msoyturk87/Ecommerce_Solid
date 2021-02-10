@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 @Where(clause = "is_deleted=false")
 public class OrderItem extends BaseEntity<Long> {
 
-
     private Integer quantity;
     private BigDecimal price;
 

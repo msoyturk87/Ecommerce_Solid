@@ -17,6 +17,6 @@ public interface UserService {
 
      List<UserDTO> readAll();
      void deactivateAccount(Long id) throws EcommerceException;
-    UserDTO readByEmail(String email) throws EcommerceException;
+     User readByEmail(String email) throws EcommerceException;
 
 }

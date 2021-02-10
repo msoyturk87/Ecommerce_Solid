@@ -84,10 +84,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO readByEmail(String email) throws EcommerceException {
-        User foundedUser = userRepository.findByEmail(email).orElseThrow(()-> new EcommerceException("There is no User with this email"));
-        return mapperUtil.convert(foundedUser,new UserDTO());    }
-
+    public User readByEmail(String email) throws EcommerceException {
+        return userRepository.findByEmail(email).orElseThrow(() -> new EcommerceException("There is no User with this email"));
+    }
     /*
 
 

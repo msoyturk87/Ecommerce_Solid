@@ -42,7 +42,7 @@ public class OrderItemServiceImpl implements OrderItemService {
     @Override
     public OrderItem create(OrderItemDTO orderItemDTO) {
 
-        // TODO get the current user froum securityContextholder
+        // TODO get the current user from securityContextholder
         // instead of "orderItem.getOrder().getUser()" add current user
 
         OrderItem convertedOrderItem = mapperUtil.convert(orderItemDTO, new OrderItem());
@@ -69,7 +69,7 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     @Override
-    public List<OrderItemDTO> buildOrderItems(CustomOrderItemDTO orderItemsDTO) {
+    public List<OrderItemDTO> buildOrderItems(CustomOrderItemDTO orderItemsDTO) throws EcommerceException {
 
         User currentUser = userService.readByEmail("admin@admin.com");
         List<Order> orders = orderService.readByUserAndStatus(currentUser, OrderStatus.IN_PROGRESS);
