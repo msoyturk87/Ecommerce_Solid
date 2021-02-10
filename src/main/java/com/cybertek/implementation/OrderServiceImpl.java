@@ -31,7 +31,9 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order create(OrderDTO orderDTO) {
 
-        //TODO How can I check order is Exist or Not
+        // TODO need to understand logic
+
+        Order convertedOrder = mapperUtil.convert(orderDTO, new Order());
 
         return null;
     }
@@ -39,11 +41,12 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void update(Order order) {
 
-        //TODO How can I check order is Exist or Not
+        // TODO need to understand logic
     }
 
     @Override
     public OrderDTO readById(Long id) throws EcommerceException {
+
         Order foundedOrder = orderRepository.findById(id)
                 .orElseThrow(() -> new EcommerceException("This order does not exist"));
 
@@ -56,12 +59,11 @@ public class OrderServiceImpl implements OrderService {
         return list.stream().map(obj -> mapperUtil.convert(obj, new OrderDTO())).collect(Collectors.toList());    }
 
     @Override
-    public List<OrderDTO> readByUserAndStatus(User user, OrderStatus status) {
+    public List<Order> readByUserAndStatus(User user, OrderStatus status) {
 
-        List<Order> list = orderRepository.findByUserAndStatus(user, status);
+        return orderRepository.findByUserAndStatus(user, status);
 
-        return list.stream().map(obj -> mapperUtil.convert(obj, new OrderDTO())).collect(Collectors.toList());    }
-
+    }
 }
 
 

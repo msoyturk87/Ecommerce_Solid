@@ -20,6 +20,7 @@ public interface OrderService {
      void update(Order order);
      OrderDTO readById(Long id) throws EcommerceException;
      List<OrderDTO> readAll();
+
      List<Order> readByUserAndStatus(User user, OrderStatus status);
 
 
