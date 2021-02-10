@@ -71,7 +71,6 @@ public class UserServiceImpl implements UserService {
         return list.stream().map(obj->{return mapperUtil.convert(obj,new UserDTO());}).collect(Collectors.toList());
 
     }
-
     @Override
     @Transactional
     public void deactivateAccount(Long id) throws EcommerceException {
@@ -87,6 +86,5 @@ public class UserServiceImpl implements UserService {
     public User readByEmail(String email) throws EcommerceException {
         return userRepository.findByEmail(email).orElseThrow(() -> new EcommerceException("There is no User with this email"));
     }
-
 
 }
