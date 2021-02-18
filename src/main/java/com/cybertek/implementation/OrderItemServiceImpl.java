@@ -16,6 +16,7 @@ import com.cybertek.repository.OrderItemRepository;
 import com.cybertek.service.OrderItemService;
 import com.cybertek.service.OrderService;
 import com.cybertek.service.UserService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +33,7 @@ public class OrderItemServiceImpl implements OrderItemService {
     private final UserService userService;
     private final MapperUtil mapperUtil;
 
-    public OrderItemServiceImpl(OrderItemRepository orderItemRepository, OrderService orderService, UserService userService, MapperUtil mapperUtil) {
+    public OrderItemServiceImpl(OrderItemRepository orderItemRepository,OrderService orderService, UserService userService, MapperUtil mapperUtil) {
         this.orderItemRepository = orderItemRepository;
         this.orderService = orderService;
         this.userService = userService;

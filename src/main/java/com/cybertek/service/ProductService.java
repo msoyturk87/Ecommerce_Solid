@@ -9,7 +9,7 @@ import com.cybertek.exception.EcommerceException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
-@Service
+
 public interface ProductService {
 
      Product create(ProductDTO productDTO) throws Exception;

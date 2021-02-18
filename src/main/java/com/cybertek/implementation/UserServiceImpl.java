@@ -1,19 +1,18 @@
 package com.cybertek.implementation;
 
 import com.cybertek.dto.UserDTO;
-import com.cybertek.enums.Status;
 import com.cybertek.entity.User;
+import com.cybertek.enums.Status;
 import com.cybertek.exception.EcommerceException;
 import com.cybertek.mapper.MapperUtil;
 import com.cybertek.repository.UserRepository;
 import com.cybertek.service.UserService;
-import org.aspectj.weaver.patterns.DeclareTypeErrorOrWarning;
-import org.springframework.data.domain.Sort;
+
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.NoSuchElementException;
+
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -58,10 +57,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO readByUsername(String username) throws EcommerceException {
-        User foundedUser = userRepository.findByUserName(username).orElseThrow(() -> new EcommerceException("User does not exist"));
+    public User readByUsername(String username) throws EcommerceException {
 
-        return mapperUtil.convert(foundedUser,new UserDTO());
+        return  userRepository.findByUserName(username).orElseThrow(() -> new EcommerceException("User does not exist"));
+
     }
 
     @Override

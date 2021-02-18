@@ -41,6 +41,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         if(foundedCategory.isPresent())
             throw new EcommerceException("Category Already exist");
+
         return categoryRepository.save(convertedCategory);
     }
 

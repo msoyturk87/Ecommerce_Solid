@@ -13,7 +13,7 @@ public interface UserService {
 
      User create(UserDTO userDTO) throws EcommerceException;
      void update(UserDTO userDTO) throws EcommerceException;
-     UserDTO readByUsername(String username) throws EcommerceException;
+     User readByUsername(String username) throws EcommerceException;
 
      List<UserDTO> readAll();
      void deactivateAccount(Long id) throws EcommerceException;
